@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CKD Prediction System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 650px;
+            margin: 30px auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: white;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        small {
+            color: #666;
+            font-size: 12px;
+            display: block;
+            margin-top: 5px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .btn {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        }
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+        }
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+            animation: slideIn 0.5s;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .result.success {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: #155724;
+            box-shadow: 0 4px 15px rgba(132, 250, 176, 0.4);
+        }
+        .result.error {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #721c24;
+            box-shadow: 0 4px 15px rgba(250, 112, 154, 0.4);
+        }
+        .result.warning {
+            background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%);
+            color: #856404;
+            box-shadow: 0 4px 15px rgba(255, 154, 86, 0.4);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 Chronic Kidney Disease Prediction</h1>
+        <form id="predictionForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" name="age" required min="1" max="120" placeholder="Enter age">
+                </div>
+                
+                <div class="form-group">
+                    <label for="bp">Blood Pressure (mm/Hg):</label>
+                    <input type="number" id="bp" name="bp" required min="50" max="200" placeholder="e.g., 120">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="sg">Specific Gravity:</label>
+                    <input type="number" id="sg" name="sg" step="0.001" min="1.000" max="1.050" required placeholder="1.020">
+                    <small>Range: 1.000 - 1.050</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="al">Albumin (0-5):</label>
+                    <input type="number" id="al" name="al" min="0" max="5" required placeholder="0-5">
+                    <small>0: Normal, 1-5: Increasing levels</small>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="su">Sugar (0-5):</label>
+                    <input type="number" id="su" name="su" min="0" max="5" required placeholder="0-5">
+                    <small>0: Normal, 1-5: Increasing levels</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="rbc">Red Blood Cells:</label>
+                    <select id="rbc" name="rbc" required>
+                        <option value="">Select...</option>
+                        <option value="0">Normal</option>
+                        <option value="1">Abnormal</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="pc">Pus Cell:</label>
+                    <select id="pc" name="pc" required>
+                        <option value="">Select...</option>
+                        <option value="0">Normal</option>
+                        <option value="1">Abnormal</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pcc">Pus Cell Clumps:</label>
+                    <select id="pcc" name="pcc" required>
+                        <option value="">Select...</option>
+                        <option value="0">Not Present</option>
+                        <option value="1">Present</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ba">Bacteria:</label>
+                    <select id="ba" name="ba" required>
+                        <option value="">Select...</option>
+                        <option value="0">Not Present</option>
+                        <option value="1">Present</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button type="submit" class="btn" id="predictBtn">🔍 Predict</button>
+                <button type="reset" class="btn btn-secondary">🔄 Reset</button>
+            </div>
+        </form>
+        
+        <div id="result" class="result"></div>
+    </div>
+    
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            // Validate all fields are filled
+            if (Object.values(data).some(value => value === '')) {
+                showResult('⚠️ Please fill in all fields.', 'error');
+                return;
+            }
+            
+            // Show loading state
+            const predictBtn = document.getElementById('predictBtn');
+            const originalText = predictBtn.innerHTML;
+            predictBtn.innerHTML = '<span class="loading"></span> Predicting...';
+            predictBtn.disabled = true;
+            
+            try {
+                // Send data to Flask backend
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    if (result.prediction === 1) {
+                        showResult('⚠️ HIGH RISK - Chronic Kidney Disease Detected! Please consult a doctor immediately.', 'warning');
+                    } else {
+                        showResult('✅ LOW RISK - No Chronic Kidney Disease detected. You appear healthy!', 'success');
+                    }
+                } else {
+                    showResult('❌ Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Connection Error: Unable to connect to server. Make sure Flask is running!', 'error');
+            } finally {
+                // Reset button state
+                predictBtn.innerHTML = originalText;
+                predictBtn.disabled = false;
+            }
+        });
+        
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = `result ${type}`;
+            resultDiv.style.display = 'block';
+        }
+        
+        document.getElementById('predictionForm').addEventListener('reset', function() {
+            document.getElementById('result').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
